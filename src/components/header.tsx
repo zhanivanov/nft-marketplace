@@ -1,6 +1,6 @@
 import MenuIcon from '@mui/icons-material/Menu';
 import StorefrontIcon from '@mui/icons-material/Storefront';
-import { AppBar, Box, Button, Container, FormControlLabel, FormGroup, IconButton, Menu, MenuItem, Switch, Toolbar, Tooltip, Typography } from "@mui/material";
+import { AppBar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
 import React from "react";
 import { Link } from "react-router-dom";
 import { Metamask } from './metamask';
@@ -15,8 +15,8 @@ const pages = [
     link: 'mint'
   },
   {
-    title: 'Collection',
-    link: 'collection'
+    title: 'Owned',
+    link: 'my-nfts'
   },
   {
     title: 'Profile',
@@ -25,12 +25,9 @@ const pages = [
 
 export const Header = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorElNav(event.currentTarget);
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorElUser(event.currentTarget);
   const handleCloseNavMenu = () => setAnchorElNav(null);
-  const handleCloseUserMenu = () => setAnchorElUser(null);
 
   return (
     <AppBar position="static">
@@ -85,8 +82,8 @@ export const Header = () => {
               }}
             >
               {pages.map((page) => (
-                <Link to={page.link}>
-                  <MenuItem key={page.link} onClick={() => handleCloseNavMenu()} LinkComponent={Link} href="/">
+                <Link to={page.link} key={page.link}>
+                  <MenuItem onClick={() => handleCloseNavMenu()} LinkComponent={Link} href="/">
                     {/* SMALL */}
                     <Typography textAlign="center">
                       {page.title}
@@ -118,9 +115,8 @@ export const Header = () => {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {/* LARGE */}
             {pages.map((page) => (
-              <Link to={page.link}>
+              <Link to={page.link} key={page.link}>
                 <Button
-                  key={page.link}
                   onClick={() => handleCloseNavMenu()}
                   sx={{ my: 2, color: 'white', display: 'block' }}
                 >

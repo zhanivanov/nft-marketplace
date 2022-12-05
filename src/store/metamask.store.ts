@@ -1,23 +1,36 @@
 import { ethers } from 'ethers';
-import { makeAutoObservable } from "mobx";
+import { computed, makeAutoObservable, runInAction } from "mobx";
 import NFTContract from "../artifacts/contracts/NFT.sol/NFT.json";
 import NFTMarketContract from "../artifacts/contracts/NFTMarket.sol/NFTMarket.json";
 
-declare const window: { ethereum: any }
+declare const window: { ethereum: any, location: any }
 const REQUEST_ACCOUNTS = 'eth_requestAccounts';
 
 export class MetamaskStore {
   public account: string = '';
-  public marketplaceContract: ethers.Contract | null = null;
-  public nftContract: ethers.Contract | null = null;
+  public marketplaceContract: ethers.Contract;
+  public nftContract: ethers.Contract;
 
   private provider: ethers.providers.Web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-  private signer: ethers.providers.JsonRpcSigner;
 
   constructor() {
-    makeAutoObservable(this);
-    this.signer = this.provider.getSigner();
-    window.ethereum.on('accountsChanged', (accounts: any[]) => this.setAccount(accounts));
+    makeAutoObservable(this, {
+      signer: computed
+    });
+    this.marketplaceContract = new ethers.Contract('', NFTMarketContract.abi, this.signer);
+    this.nftContract = new ethers.Contract('', NFTContract.abi, this.signer);
+    window.ethereum.on('accountsChanged', (accounts: any[]) => {
+      this.setAccount(accounts);
+      window.location.assign("/")
+    });
+  }
+
+  public get signer(): ethers.providers.JsonRpcSigner {
+    return this.provider.getSigner(this.account || undefined);
+  }
+
+  public async getNetwork(): Promise<ethers.providers.Network> {
+    return this.provider.getNetwork();
   }
 
   public async init() {
@@ -43,16 +56,14 @@ export class MetamaskStore {
   }
 
   private async loadContracts() {
-    const { chainId } = await this.provider.getNetwork()
-    if (chainId.toString() !== process.env.CHAIN_ID) {
-      this.marketplaceContract = null;
-      this.nftContract = null;
+    const { chainId } = await this.getNetwork();
+    if (chainId.toString() !== process.env.REACT_APP_CHAIN_ID) {
+      throw new Error("NETWORK ID MISMATCH");
     }
 
-    const nftMarketplaceContract = new ethers.Contract(process.env.NFT_MARKET_CONTRACT_ADDRESS || '', NFTMarketContract.abi, this.signer);
-    const nftContract = new ethers.Contract(process.env.NFT_CONTRACT_ADDRESS || '', NFTContract.abi, this.signer);
-
-    this.marketplaceContract = nftMarketplaceContract;
-    this.nftContract = nftContract;
+    runInAction(() => {
+      this.marketplaceContract = new ethers.Contract(process.env.REACT_APP_NFT_MARKET_CONTRACT_ADDRESS || '', NFTMarketContract.abi, this.signer);
+      this.nftContract = new ethers.Contract(process.env.REACT_APP_NFT_CONTRACT_ADDRESS || '', NFTContract.abi, this.signer);
+    });
   }
 }

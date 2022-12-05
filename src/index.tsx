@@ -9,7 +9,9 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { ErrorPage } from './routes/error-page';
 import { Mint } from './routes/mint';
+import { MyNFTS } from './routes/my-nfts';
 import { NFTS } from './routes/nfts';
+import { Profile } from './routes/profile';
 import { Root } from './routes/root';
 import { MetamaskStore } from './store/metamask.store';
 
@@ -28,6 +30,14 @@ const appInit = async () => {
         {
           path: "mint",
           element: <Mint />
+        },
+        {
+          path: "my-nfts",
+          element: <MyNFTS />
+        },
+        {
+          path: "profile",
+          element: <Profile />
         }
       ]
     },
